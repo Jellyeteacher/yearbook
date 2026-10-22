@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎈 나의 1년 학교생활 추억록 & 회고</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- html2canvas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Chart.js for Teacher Stats -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;600;700;800&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Gothic A1', 'sans-serif'],
+            handwriting: ['Gaegu', 'cursive'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: #fcd34d; border-radius: 4px; }
+    
+    @media print {
+      body * { visibility: hidden; }
+      #summary-card-container, #summary-card-container * { visibility: visible; }
+      #summary-card-container { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20px; box-shadow: none !important; }
+      .no-print { display: none !important; }
+    }
+
+    .animate-bounce-subtle { animation: bounce-subtle 2s infinite ease-in-out; }
+    @keyframes bounce-subtle {
+      0%, 100% { transform: translateY(-3%); }
+      50% { transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-amber-50/60 min-h-screen text-slate-800 font-sans antialiased flex flex-col justify-between selection:bg-amber-200">
+
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed top-5 right-5 z-50 transform translate-y-[-150%] opacity-0 transition-all duration-300 bg-slate-800 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 text-sm font-medium">
+    <i data-lucide="check-circle-2" class="text-green-400 w-5 h-5"></i>
+    <span id="toast-message">알림 메시지</span>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex flex-col items-center justify-center text-white">
+    <div class="w-12 h-12 border-4 border-amber-300 border-t-amber-500 rounded-full animate-spin mb-3"></div>
+    <p id="loading-text" class="font-bold text-base">구글 시트와 통신 중입니다...</p>
+  </div>
+
+  <!-- Header -->
+  <header class="w-full bg-white/80 backdrop-blur-md border-b border-amber-100 sticky top-0 z-30">
+    <div class="max-w-5xl mx-auto px-4 py-3.5 flex justify-between items-center">
+      <div class="flex items-center space-x-2 cursor-pointer" onclick="goHome()">
+        <span class="text-2xl animate-bounce-subtle">🏫</span>
+        <h1 class="text-lg md:text-xl font-bold bg-gradient-to-r from-amber-600 to-orange-500 bg-clip-text text-transparent">
+          1년 학교생활 회고록
+        </h1>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="openGasSettingsModal()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-full border border-slate-200 transition flex items-center gap-1">
+          <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+          <span>GAS URL 설정</span>
+        </button>
+        <div id="header-student-tag" class="hidden text-xs md:text-sm font-semibold bg-amber-100 text-amber-800 px-3 py-1.5 rounded-full border border-amber-200"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="flex-grow max-w-4xl w-full mx-auto px-4 py-6 md:py-8 flex flex-col justify-center">
+
+    <!-- STEP 0: Landing / Home Selection Screen -->
+    <section id="step-home" class="bg-white rounded-3xl p-6 md:p-10 shadow-xl shadow-amber-100/50 border border-amber-100 transition-all text-center">
+      <span class="inline-block p-4 rounded-full bg-amber-100 text-amber-600 mb-4">
+        <i data-lucide="sparkles" class="w-10 h-10"></i>
+      </span>
+      <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 mb-2">1년 학교생활 회고에 오신 것을 환영합니다! ✨</h2>
+      <p class="text-slate-500 text-sm md:text-base max-w-md mx-auto mb-8">
+        올 한 해를 돌아보며 나의 성장을 기록하고, 소중했던 추억 카드도 간직해 보세요.
+      </p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md mx-auto">
+        <button onclick="showLoginModal('write')" class="p-6 bg-gradient-to-br from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white rounded-2xl shadow-lg shadow-orange-500/20 transition transform active:scale-95 text-left flex flex-col justify-between group">
+          <div class="flex justify-between items-center mb-4">
+            <i data-lucide="pen-tool" class="w-8 h-8"></i>
+            <i data-lucide="arrow-right" class="w-5 h-5 opacity-70 group-hover:translate-x-1 transition"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold">회고 작성하기 / 수정하기</h3>
+            <p class="text-xs text-amber-100 mt-1">질문에 답변하며 추억록을 만들어봅니다.</p>
+          </div>
+        </button>
+
+        <button onclick="showLoginModal('view')" class="p-6 bg-slate-800 hover:bg-slate-900 text-white rounded-2xl shadow-lg shadow-slate-800/20 transition transform active:scale-95 text-left flex flex-col justify-between group">
+          <div class="flex justify-between items-center mb-4">
+            <i data-lucide="search" class="w-8 h-8 text-amber-400"></i>
+            <i data-lucide="arrow-right" class="w-5 h-5 opacity-70 group-hover:translate-x-1 transition"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-amber-400">내 답변 조회하기</h3>
+            <p class="text-xs text-slate-400 mt-1">이전에 제출한 내 답변 카드 확인</p>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 1: Survey Section (Questions) -->
+    <section id="step-survey" class="hidden">
+      <!-- Progress Bar -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-amber-100 mb-6">
+        <div class="flex justify-between items-center text-xs md:text-sm font-bold mb-2 text-slate-600">
+          <span id="question-category" class="bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full text-xs">카테고리</span>
+          <span id="progress-text" class="text-slate-400">질문 1 / 11</span>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden p-0.5 border border-slate-100">
+          <div id="progress-bar" class="bg-gradient-to-r from-amber-400 to-orange-500 h-full rounded-full transition-all duration-300 w-0"></div>
+        </div>
+      </div>
+
+      <!-- Question Card Container -->
+      <div id="question-card" class="bg-white rounded-3xl p-6 md:p-8 shadow-xl shadow-amber-100/40 border border-amber-100 min-h-[380px] flex flex-col justify-between transition-all">
+        <div>
+          <div class="flex items-start space-x-3 mb-6">
+            <span id="q-number" class="flex-shrink-0 w-8 h-8 rounded-full bg-amber-500 text-white font-black text-base flex items-center justify-center mt-0.5">1</span>
+            <h3 id="q-title" class="text-lg md:text-xl font-bold text-slate-800 leading-snug">질문 내용</h3>
+          </div>
+          <div id="q-answer-container" class="space-y-3 pl-0 md:pl-11"></div>
+        </div>
+
+        <div class="pt-8 border-t border-slate-100 mt-6 flex justify-between items-center">
+          <button id="btn-prev" onclick="prevQuestion()" class="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 transition flex items-center gap-1.5 text-sm disabled:opacity-40 disabled:cursor-not-allowed">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            <span>이전</span>
+          </button>
+
+          <button id="btn-next" onclick="nextQuestion()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold shadow-md shadow-orange-500/20 transition flex items-center gap-1.5 text-sm active:scale-95">
+            <span id="btn-next-text">다음</span>
+            <i id="btn-next-icon" data-lucide="chevron-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 2: Summary Card View (For Student) -->
+    <section id="step-summary" class="hidden space-y-6">
+      <div class="no-print bg-white p-4 rounded-2xl border border-amber-100 shadow-sm flex flex-wrap gap-2 justify-between items-center">
+        <div class="text-sm font-bold text-slate-700 flex items-center gap-2">
+          <span class="text-xl">🎉</span>
+          <span>1년 학교생활 추억 카드</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="editAnswers()" class="px-3 py-1.5 rounded-xl text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 transition flex items-center gap-1">
+            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> 수정
+          </button>
+          <button onclick="copyToClipboard()" class="px-3 py-1.5 rounded-xl text-xs font-semibold border border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100 transition flex items-center gap-1">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 텍스트 복사
+          </button>
+          <button onclick="downloadCardImage()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-500 text-white hover:bg-amber-600 transition flex items-center gap-1">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i> 이미지 저장
+          </button>
+          <button onclick="window.print()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 text-white hover:bg-slate-700 transition flex items-center gap-1">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i> 인쇄
+          </button>
+          <button onclick="goHome()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-200 text-slate-700 hover:bg-slate-300 transition">
+            홈으로
+          </button>
+        </div>
+      </div>
+
+      <div id="summary-card-container" class="bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100/50 p-6 md:p-8 rounded-3xl border-4 border-amber-200 shadow-2xl relative overflow-hidden">
+        <div class="bg-white/90 backdrop-blur rounded-2xl p-6 border border-amber-200/60 shadow-sm text-center mb-6 relative">
+          <p id="summary-school-name" class="text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">우리 학교</p>
+          <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-2">나의 1년 학교생활 추억 카드</h2>
+          <div class="inline-flex items-center gap-2 bg-amber-100 border border-amber-200 text-amber-900 font-bold px-4 py-1 rounded-full text-sm">
+            <span id="summary-student-info">아이디 / 이름</span>
+          </div>
+        </div>
+
+        <div id="summary-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+        <div class="mt-6 pt-4 border-t border-amber-200/60 text-center">
+          <p class="font-handwriting text-xl text-amber-800 font-bold">
+            "올 한 해도 정말 수고 많았어! 너의 앞날을 언제나 응원해 🌟"
+          </p>
+          <p class="text-[10px] text-slate-400 mt-1">작성일: <span id="summary-date"></span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 3: Teacher / Admin Dashboard Section -->
+    <section id="step-admin" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-3xl shadow-lg border border-slate-200">
+        <div class="flex flex-wrap justify-between items-center gap-4 mb-6 pb-4 border-b border-slate-100">
+          <div>
+            <span class="bg-indigo-100 text-indigo-800 font-bold text-xs px-3 py-1 rounded-full">관리자 전용</span>
+            <h2 class="text-2xl font-extrabold text-slate-800 mt-1">선생님 통합 대시보드</h2>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="fetchAdminData()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition flex items-center gap-1.5">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> 새로고침
+            </button>
+            <button onclick="goHome()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-xs transition">
+              로그아웃
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats Overview Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-2xl">
+            <p class="text-xs font-bold text-indigo-600 mb-1">총 제출 인원</p>
+            <p id="stat-total-count" class="text-3xl font-black text-indigo-900">0 명</p>
+          </div>
+          <div class="bg-amber-50 border border-amber-100 p-4 rounded-2xl">
+            <p class="text-xs font-bold text-amber-600 mb-1">최근 제출시간</p>
+            <p id="stat-last-time" class="text-sm font-bold text-amber-900 truncate">-</p>
+          </div>
+          <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl">
+            <p class="text-xs font-bold text-emerald-600 mb-1">인기 과목 1위</p>
+            <p id="stat-top-subject" class="text-base font-bold text-emerald-900 truncate">-</p>
+          </div>
+        </div>
+
+        <!-- Student Submission Table -->
+        <div class="mb-8">
+          <h3 class="font-bold text-slate-800 mb-3 text-base flex items-center gap-2">
+            <i data-lucide="users" class="w-5 h-5 text-indigo-600"></i> 제출된 학생 목록
+          </h3>
+          <div class="overflow-x-auto border border-slate-200 rounded-2xl">
+            <table class="w-full text-left text-xs md:text-sm">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold">
+                <tr>
+                  <th class="p-3">제출일시</th>
+                  <th class="p-3">학번/아이디</th>
+                  <th class="p-3">이름</th>
+                  <th class="p-3 text-center">상세보기</th>
+                </tr>
+              </thead>
+              <tbody id="admin-student-table" class="divide-y divide-slate-100 text-slate-700">
+                <tr>
+                  <td colspan="4" class="p-6 text-center text-slate-400">데이터를 불러오는 중입니다...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Event Stats Summary Chart -->
+        <div>
+          <h3 class="font-bold text-slate-800 mb-3 text-base flex items-center gap-2">
+            <i data-lucide="bar-chart-3" class="w-5 h-5 text-indigo-600"></i> 가장 기억에 남는 행사/활동 통계
+          </h3>
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 max-w-lg mx-auto">
+            <canvas id="eventChart" width="400" height="250"></canvas>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full text-center py-4 text-xs text-slate-400 border-t border-amber-100/60 bg-white/50 no-print">
+    <div class="flex justify-center items-center gap-4 mb-1">
+      <span>© 1년 학교생활 회고록</span>
+      <button onclick="showTeacherLoginModal()" class="text-slate-500 hover:text-indigo-600 font-bold underline flex items-center gap-1">
+        <i data-lucide="lock" class="w-3 h-3"></i> 선생님(관리자) 로그인
+      </button>
+    </div>
+  </footer>
+
+  <!-- MODALS -->
+
+  <!-- 1. GAS App URL Config Modal -->
+  <div id="modal-gas" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
+          <i data-lucide="settings" class="text-amber-500"></i> 구글 앱스 스크립트 URL 설정
+        </h3>
+        <button onclick="closeModal('modal-gas')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x"></i></button>
+      </div>
+      <p class="text-xs text-slate-500">
+        배포된 구글 앱스 스크립트(GAS) Web App Exec URL을 입력해 주세요.
+      </p>
+      <input type="url" id="input-gas-url" placeholder="https://script.google.com/macros/s/AKfycbyrBYb8cFtc44KjtO9_HEaElWoY2t_PjOJA-waQ8WEbw5RJaI1IanTA0w64qJE0m2rAMw/exec">
+      <button onclick="saveGasUrl()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 rounded-xl text-sm transition">
+        저장하기
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. Student Auth Modal (Login / Start) -->
+  <div id="modal-login" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 id="modal-login-title" class="font-bold text-lg text-slate-800">학생 인증</h3>
+        <button onclick="closeModal('modal-login')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x"></i></button>
+      </div>
+      <form onsubmit="handleStudentAuth(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">학생 아이디 (학번 등) *</label>
+          <input type="text" id="auth-student-id" required placeholder="예: 20315 또는 student01" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-amber-400 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">비밀번호 *</label>
+          <input type="password" id="auth-password" required placeholder="비밀번호 입력" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-amber-400 focus:outline-none">
+        </div>
+        <div id="auth-name-field">
+          <label class="block text-xs font-bold text-slate-600 mb-1">이름 <span class="text-slate-400 font-normal">(선택)</span></label>
+          <input type="text" id="auth-student-name" placeholder="홍길동" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-amber-400 focus:outline-none">
+        </div>
+        <button type="submit" id="btn-auth-submit" class="w-full mt-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold py-3 rounded-xl shadow-md text-sm hover:opacity-95 transition">
+          확인
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Teacher Login Modal -->
+  <div id="modal-teacher" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
+          <i data-lucide="lock" class="text-indigo-600"></i> 선생님 인증
+        </h3>
+        <button onclick="closeModal('modal-teacher')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x"></i></button>
+      </div>
+      <form onsubmit="handleTeacherLogin(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">관리자 비밀번호</label>
+          <input type="password" id="teacher-password" required placeholder="비밀번호 4자리" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+        </div>
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl shadow-md text-sm transition">
+          대시보드 접속
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Student Detail View Modal (For Teacher) -->
+  <div id="modal-student-detail" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl space-y-4 my-8 max-h-[85vh] flex flex-col">
+      <div class="flex justify-between items-center border-b pb-3">
+        <div>
+          <h3 id="detail-student-title" class="font-bold text-lg text-slate-800">학생 상세 답변</h3>
+          <p id="detail-student-sub" class="text-xs text-slate-500"></p>
+        </div>
+        <button onclick="closeModal('modal-student-detail')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x"></i></button>
+      </div>
+      <div id="detail-answers-body" class="flex-grow overflow-y-auto space-y-3 pr-2"></div>
+      <div class="pt-3 border-t text-right">
+        <button onclick="closeModal('modal-student-detail')" class="px-4 py-2 bg-slate-800 text-white font-bold rounded-xl text-xs">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Logic JS -->
+  <script>
+    // ========================================================
+    // 1. Google Apps Script Web App Exec URL Settings
+    // ========================================================
+    let GAS_WEB_APP_URL = localStorage.getItem("GAS_WEB_APP_URL") || "";
+
+    // Questions Data Array
+    const questions = [
+      { id: 1, category: "추억", type: "choice", question: "가장 기억에 남는 올해 학교 행사/활동은?", options: ["체육대회", "현장체험학습(놀이공원 등)", "학교 축제", "학년의 날", "수련회 및 수학여행"], hasOther: true },
+      { id: 2, category: "추억", type: "text", question: "올해 나에게 일어난 가장 기뻤거나 뿌듯했던 순간은?", placeholder: "자유롭게 적어주세요." },
+      { id: 3, category: "추억", type: "text", question: "학급(우리 반)에서 가장 기억에 남는 스페셜 에피소드는?", placeholder: "우리 반만의 재밌었던 일들을 적어보세요." },
+      { id: 4, category: "관계", type: "text", question: "올해 우리 반에서 나를 가장 많이 웃게 해준 재밌었던 친구는?", placeholder: "친구 이름을 적어주세요." },
+      { id: 5, category: "관계", type: "text", question: "내가 학급이나 친구들에게 도움이 되었던 경험은?", placeholder: "친구를 도왔거나 학급에 기여한 경험을 적어보세요." },
+      { id: 6, category: "관계", type: "text", question: "고마움을 전하고 싶은 친구나 선생님에게 남기는 한 마디는?", placeholder: "전하고 싶은 마음을 적어주세요." },
+      { id: 7, category: "배움", type: "choice", question: "올해 가장 즐겁고 흥미로웠던 수업(과목)은?", options: ["국어", "수학", "영어", "사회·역사", "과학", "체육", "음악·미술", "기술·가정"], hasOther: true },
+      { id: 8, category: "배움", type: "choice", question: "내가 올 한 해 학급에서 맡아 수행한 역할(1인 1역 등)은?", options: ["반장·부반장", "환경·청소 주번", "칠판·기자재 담당", "우유·급식 주번", "도서·학습 도우미"], hasOther: true },
+      { id: 9, category: "성장", type: "choice", question: "연초의 나에 비해 올해 내가 가장 성장했다고 느끼는 부분은?", options: ["친구들과 관계 맺기", "공부 및 성적 관리", "규칙적인 생활 습관", "감정 조절 및 문제 해결 능력"], hasOther: true },
+      { id: 10, category: "성찰", type: "text", question: "돌아보니 올해 조금 아쉬웠거나, 다음 해에는 바꿔보고 싶은 점은?", placeholder: "아쉬운 점과 내년 다짐을 적어보세요." },
+      { id: 11, category: "성찰", type: "text", question: "1년 동안 수고한 '나 자신'에게 해주고 싶은 한 마디는?", placeholder: "나 자신에게 격려와 응원의 한 마디!" }
+    ];
+
+    // App State
+    let authMode = "write"; // "write" or "view"
+    let currentStudent = { studentId: "", password: "", studentName: "" };
+    let currentIdx = 0;
+    let answers = {};
+    let adminDataCache = [];
+    let eventChartInstance = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+    });
+
+    // Navigation & UI Helpers
+    function goHome() {
+      document.getElementById("step-home").classList.remove("hidden");
+      document.getElementById("step-survey").classList.add("hidden");
+      document.getElementById("step-summary").classList.add("hidden");
+      document.getElementById("step-admin").classList.add("hidden");
+      document.getElementById("header-student-tag").classList.add("hidden");
+    }
+
+    function showLoading(msg = "처리 중입니다...") {
+      document.getElementById("loading-text").textContent = msg;
+      document.getElementById("loading-overlay").classList.remove("hidden");
+    }
+
+    function hideLoading() {
+      document.getElementById("loading-overlay").classList.add("hidden");
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      document.getElementById("toast-message").textContent = msg;
+      toast.classList.remove("translate-y-[-150%]", "opacity-0");
+      toast.classList.add("translate-y-0", "opacity-100");
+      setTimeout(() => {
+        toast.classList.add("translate-y-[-150%]", "opacity-0");
+        toast.classList.remove("translate-y-0", "opacity-100");
+      }, 2500);
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add("hidden");
+    }
+
+    // Modal Control
+    function openGasSettingsModal() {
+      document.getElementById("input-gas-url").value = GAS_WEB_APP_URL;
+      document.getElementById("modal-gas").classList.remove("hidden");
+    }
+
+    function saveGasUrl() {
+      const url = document.getElementById("input-gas-url").value.trim();
+      GAS_WEB_APP_URL = url;
+      localStorage.setItem("GAS_WEB_APP_URL", url);
+      closeModal("modal-gas");
+      showToast("구글 시트 URL이 저장되었습니다!");
+    }
+
+    function showLoginModal(mode) {
+      authMode = mode;
+      document.getElementById("auth-student-id").value = "";
+      document.getElementById("auth-password").value = "";
+      document.getElementById("auth-student-name").value = "";
+
+      const title = mode === "write" ? "회고 작성 학생 인증" : "내 답변 조회 로그인";
+      const btnText = mode === "write" ? "작성 시작하기" : "내 답변 확인하기";
+      document.getElementById("modal-login-title").textContent = title;
+      document.getElementById("btn-auth-submit").textContent = btnText;
+
+      const nameField = document.getElementById("auth-name-field");
+      if (mode === "view") nameField.classList.add("hidden");
+      else nameField.classList.remove("hidden");
+
+      document.getElementById("modal-login").classList.remove("hidden");
+    }
+
+    function showTeacherLoginModal() {
+      document.getElementById("teacher-password").value = "";
+      document.getElementById("modal-teacher").classList.remove("hidden");
+    }
+
+    // ========================================================
+    // 2. Student Actions (Write / View / GAS API)
+    // ========================================================
+    async function handleStudentAuth(e) {
+      e.preventDefault();
+      const studentId = document.getElementById("auth-student-id").value.trim();
+      const password = document.getElementById("auth-password").value.trim();
+      const studentName = document.getElementById("auth-student-name").value.trim();
+
+      if (!studentId || !password) {
+        showToast("아이디와 비밀번호를 입력해 주세요.");
+        return;
+      }
+
+      currentStudent = { studentId, password, studentName };
+      closeModal("modal-login");
+
+      if (authMode === "write") {
+        // Update Header
+        const headerTag = document.getElementById("header-student-tag");
+        headerTag.textContent = `${studentId} (${studentName || '학생'})`;
+        headerTag.classList.remove("hidden");
+
+        // Start survey
+        currentIdx = 0;
+        document.getElementById("step-home").classList.add("hidden");
+        document.getElementById("step-survey").classList.remove("hidden");
+        renderQuestion();
+      } else if (authMode === "view") {
+        // Fetch existing response from GAS
+        fetchStudentResponse(studentId, password);
+      }
+    }
+
+    async function fetchStudentResponse(studentId, password) {
+      if (!GAS_WEB_APP_URL) {
+        showToast("⚠️ 상단의 'GAS URL 설정'을 먼저 완료해 주세요!");
+        openGasSettingsModal();
+        return;
+      }
+
+      showLoading("내 답변을 불러오는 중입니다...");
+      try {
+        const response = await fetch(GAS_WEB_APP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify({
+            action: "getStudentResponse",
+            studentId,
+            password
+          })
+        });
+
+        const res = await response.json();
+        hideLoading();
+
+        if (res.success) {
+          answers = res.data.answers || {};
+          currentStudent.studentName = res.data.studentName || "";
+          showSummaryScreen();
+        } else {
+          showToast(res.message || "답변을 불러오지 못했습니다.");
+        }
+      } catch (err) {
+        hideLoading();
+        console.error(err);
+        showToast("구글 시트 연동 오류가 발생했습니다.");
+      }
+    }
+
+    // Survey Rendering Logic
+    function renderQuestion() {
+      const q = questions[currentIdx];
+
+      document.getElementById("question-category").textContent = q.category;
+      document.getElementById("progress-text").textContent = `질문 ${currentIdx + 1} / ${questions.length}`;
+      
+      const progressPercent = ((currentIdx + 1) / questions.length) * 100;
+      document.getElementById("progress-bar").style.width = `${progressPercent}%`;
+
+      document.getElementById("q-number").textContent = q.id;
+      document.getElementById("q-title").textContent = q.question;
+
+      const container = document.getElementById("q-answer-container");
+      container.innerHTML = "";
+
+      const currentAnswer = answers[q.id] || { value: "", otherText: "" };
+
+      if (q.type === "choice") {
+        const choicesDiv = document.createElement("div");
+        choicesDiv.className = "grid grid-cols-1 sm:grid-cols-2 gap-2.5";
+
+        q.options.forEach(opt => {
+          const isSelected = currentAnswer.value === opt;
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = `w-full text-left p-3.5 rounded-2xl border transition-all flex items-center justify-between text-sm font-medium ${
+            isSelected 
+              ? "border-amber-500 bg-amber-50 text-amber-900 font-bold shadow-sm" 
+              : "border-slate-200 hover:border-amber-300 hover:bg-slate-50 text-slate-700"
+          }`;
+          
+          btn.innerHTML = `
+            <span>${opt}</span>
+            <div class="w-5 h-5 rounded-full border border-slate-300 flex items-center justify-center ${isSelected ? "bg-amber-500 border-amber-500 text-white" : "bg-white"}">
+              ${isSelected ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : ''}
+            </div>
+          `;
+          btn.onclick = () => selectChoice(q.id, opt);
+          choicesDiv.appendChild(btn);
+        });
+
+        if (q.hasOther) {
+          const isOtherSelected = currentAnswer.value === "기타";
+          const otherBtn = document.createElement("button");
+          otherBtn.type = "button";
+          otherBtn.className = `w-full text-left p-3.5 rounded-2xl border transition-all flex items-center justify-between text-sm font-medium ${
+            isOtherSelected 
+              ? "border-amber-500 bg-amber-50 text-amber-900 font-bold shadow-sm" 
+              : "border-slate-200 hover:border-amber-300 hover:bg-slate-50 text-slate-700"
+          }`;
+
+          otherBtn.innerHTML = `
+            <span>기타 (직접 입력)</span>
+            <div class="w-5 h-5 rounded-full border border-slate-300 flex items-center justify-center ${isOtherSelected ? "bg-amber-500 border-amber-500 text-white" : "bg-white"}">
+              ${isOtherSelected ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : ''}
+            </div>
+          `;
+          otherBtn.onclick = () => selectChoice(q.id, "기타");
+          choicesDiv.appendChild(otherBtn);
+        }
+
+        container.appendChild(choicesDiv);
+
+        if (q.hasOther && currentAnswer.value === "기타") {
+          const otherInputDiv = document.createElement("div");
+          otherInputDiv.className = "mt-3";
+          otherInputDiv.innerHTML = `
+            <input type="text" 
+              placeholder="기타 내용을 입력해 주세요" 
+              value="${currentAnswer.otherText || ''}"
+              class="w-full px-4 py-2.5 rounded-xl border border-amber-300 bg-white focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm"
+              oninput="updateOtherText(${q.id}, this.value)"
+            />
+          `;
+          container.appendChild(otherInputDiv);
+        }
+
+      } else if (q.type === "text") {
+        const textarea = document.createElement("textarea");
+        textarea.rows = 4;
+        textarea.placeholder = q.placeholder || "답변을 적어주세요.";
+        textarea.className = "w-full p-4 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm leading-relaxed text-slate-800 resize-none shadow-inner";
+        textarea.value = currentAnswer.value || "";
+        textarea.oninput = (e) => {
+          answers[q.id] = { value: e.target.value };
+        };
+        container.appendChild(textarea);
+      }
+
+      lucide.createIcons();
+
+      document.getElementById("btn-prev").disabled = currentIdx === 0;
+      const nextBtnText = document.getElementById("btn-next-text");
+      const nextBtnIcon = document.getElementById("btn-next-icon");
+
+      if (currentIdx === questions.length - 1) {
+        nextBtnText.textContent = "제출 및 추억 카드 보기";
+        nextBtnIcon.setAttribute("data-lucide", "sparkles");
+      } else {
+        nextBtnText.textContent = "다음";
+        nextBtnIcon.setAttribute("data-lucide", "chevron-right");
+      }
+      lucide.createIcons();
+    }
+
+    function selectChoice(questionId, value) {
+      if (!answers[questionId]) answers[questionId] = { value: "", otherText: "" };
+      answers[questionId].value = value;
+      renderQuestion();
+    }
+
+    function updateOtherText(questionId, text) {
+      if (answers[questionId]) answers[questionId].otherText = text;
+    }
+
+    function prevQuestion() {
+      if (currentIdx > 0) {
+        currentIdx--;
+        renderQuestion();
+      }
+    }
+
+    function nextQuestion() {
+      const q = questions[currentIdx];
+      const ans = answers[q.id];
+
+      if (!ans || !ans.value || ans.value.trim() === "") {
+        showToast("답변을 입력하거나 선택해 주세요!");
+        return;
+      }
+
+      if (q.type === "choice" && ans.value === "기타" && (!ans.otherText || ans.otherText.trim() === "")) {
+        showToast("기타 내용을 입력해 주세요.");
+        return;
+      }
+
+      if (currentIdx < questions.length - 1) {
+        currentIdx++;
+        renderQuestion();
+      } else {
+        // Final Submit to GAS
+        submitAnswersToGas();
+      }
+    }
+
+    async function submitAnswersToGas() {
+      if (!GAS_WEB_APP_URL) {
+        showToast("⚠️ GAS URL이 설정되지 않아 로컬에만 저장됩니다.");
+        showSummaryScreen();
+        return;
+      }
+
+      showLoading("구글 시트에 답변을 저장하는 중...");
+
+      try {
+        const response = await fetch(GAS_WEB_APP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify({
+            action: "submit",
+            studentId: currentStudent.studentId,
+            password: currentStudent.password,
+            studentName: currentStudent.studentName,
+            answers: answers
+          })
+        });
+
+        const res = await response.json();
+        hideLoading();
+
+        if (res.success) {
+          showToast("성공적으로 저장되었습니다! 🎉");
+          showSummaryScreen();
+        } else {
+          showToast(res.message || "저장 중 오류가 발생했습니다.");
+        }
+      } catch (err) {
+        hideLoading();
+        console.error(err);
+        showToast("구글 시트 전송에 실패했습니다. (URL 확인 필요)");
+        showSummaryScreen();
+      }
+    }
+
+    function showSummaryScreen() {
+      document.getElementById("step-survey").classList.add("hidden");
+      document.getElementById("step-home").classList.add("hidden");
+      document.getElementById("step-summary").classList.remove("hidden");
+
+      document.getElementById("summary-student-info").textContent = 
+        `${currentStudent.studentId} ${currentStudent.studentName ? '(' + currentStudent.studentName + ')' : ''}`;
+
+      const today = new Date();
+      document.getElementById("summary-date").textContent = 
+        `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
+
+      const grid = document.getElementById("summary-grid");
+      grid.innerHTML = "";
+
+      questions.forEach(q => {
+        const ans = answers[q.id];
+        let displayText = ans ? ans.value : "미작성";
+        if (ans && ans.value === "기타" && ans.otherText) {
+          displayText = `기타: ${ans.otherText}`;
+        }
+
+        const card = document.createElement("div");
+        card.className = "bg-white/80 backdrop-blur rounded-2xl p-4 border border-amber-200/80 shadow-sm flex flex-col justify-between";
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">${q.category}</span>
+              <span class="text-xs text-slate-400 font-semibold">Q${q.id}</span>
+            </div>
+            <h4 class="text-xs md:text-sm font-bold text-slate-700 mb-2">${q.question}</h4>
+          </div>
+          <div class="mt-2 pt-2 border-t border-slate-100 text-sm font-semibold text-slate-800 bg-amber-50/40 p-2.5 rounded-xl border border-amber-100/50">
+            ${escapeHtml(displayText)}
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      triggerConfetti();
+    }
+
+    function editAnswers() {
+      document.getElementById("step-summary").classList.add("hidden");
+      document.getElementById("step-survey").classList.remove("hidden");
+    }
+
+    // ========================================================
+    // 3. Teacher / Admin Dashboard Logic
+    // ========================================================
+    async function handleTeacherLogin(e) {
+      e.preventDefault();
+      const pw = document.getElementById("teacher-password").value.trim();
+
+      if (pw !== "2626") {
+        showToast("비밀번호가 일치하지 않습니다.");
+        return;
+      }
+
+      closeModal("modal-teacher");
+      document.getElementById("step-home").classList.add("hidden");
+      document.getElementById("step-summary").classList.add("hidden");
+      document.getElementById("step-survey").classList.add("hidden");
+      document.getElementById("step-admin").classList.remove("hidden");
+
+      fetchAdminData();
+    }
+
+    async function fetchAdminData() {
+      if (!GAS_WEB_APP_URL) {
+        showToast("⚠️ GAS URL을 먼저 입력해 주세요!");
+        openGasSettingsModal();
+        return;
+      }
+
+      showLoading("전체 제출 데이터를 불러오는 중...");
+
+      try {
+        const response = await fetch(GAS_WEB_APP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify({
+            action: "getAdminData",
+            adminPassword: "2626"
+          })
+        });
+
+        const res = await response.json();
+        hideLoading();
+
+        if (res.success) {
+          adminDataCache = res.data || [];
+          renderAdminDashboard(adminDataCache);
+        } else {
+          showToast(res.message || "데이터 불러오기 실패");
+        }
+      } catch (err) {
+        hideLoading();
+        console.error(err);
+        showToast("구글 시트 연동 오류가 발생했습니다.");
+      }
+    }
+
+    function renderAdminDashboard(data) {
+      // Total count
+      document.getElementById("stat-total-count").textContent = `${data.length} 명`;
+
+      // Last submission time
+      if (data.length > 0) {
+        document.getElementById("stat-last-time").textContent = data[data.length - 1].timestamp || "-";
+      }
+
+      // Render Table
+      const tbody = document.getElementById("admin-student-table");
+      tbody.innerHTML = "";
+
+      if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400">제출된 데이터가 없습니다.</td></tr>`;
+        return;
+      }
+
+      data.forEach((item, index) => {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-50 transition";
+        tr.innerHTML = `
+          <td class="p-3 text-slate-500">${escapeHtml(item.timestamp || '-')}</td>
+          <td class="p-3 font-bold text-slate-800">${escapeHtml(item.studentId)}</td>
+          <td class="p-3 text-slate-700">${escapeHtml(item.studentName || '-')}</td>
+          <td class="p-3 text-center">
+            <button onclick="openStudentDetailModal(${index})" class="px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-lg text-xs transition">
+              답변 보기
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Calculate Stats & Render Chart
+      calculateAndRenderStats(data);
+    }
+
+    function calculateAndRenderStats(data) {
+      const eventCounts = {};
+      const subjectCounts = {};
+
+      data.forEach(item => {
+        const ans = item.answers || {};
+        // Q1 Event
+        if (ans[1] && ans[1].value) {
+          const val = ans[1].value === "기타" ? (ans[1].otherText || "기타") : ans[1].value;
+          eventCounts[val] = (eventCounts[val] || 0) + 1;
+        }
+        // Q7 Subject
+        if (ans[7] && ans[7].value) {
+          const val = ans[7].value === "기타" ? (ans[7].otherText || "기타") : ans[7].value;
+          subjectCounts[val] = (subjectCounts[val] || 0) + 1;
+        }
+      });
+
+      // Find top subject
+      let topSub = "-";
+      let maxSubCount = 0;
+      Object.keys(subjectCounts).forEach(s => {
+        if (subjectCounts[s] > maxSubCount) {
+          maxSubCount = subjectCounts[s];
+          topSub = s;
+        }
+      });
+      document.getElementById("stat-top-subject").textContent = topSub;
+
+      // Render Chart (Q1 Events)
+      const labels = Object.keys(eventCounts);
+      const counts = Object.values(eventCounts);
+
+      const ctx = document.getElementById("eventChart").getContext("2d");
+      if (eventChartInstance) eventChartInstance.destroy();
+
+      eventChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels.length > 0 ? labels : ["데이터 없음"],
+          datasets: [{
+            label: '응답 수',
+            data: counts.length > 0 ? counts : [0],
+            backgroundColor: 'rgba(99, 102, 241, 0.7)',
+            borderColor: 'rgb(99, 102, 241)',
+            borderWidth: 1,
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+      });
+    }
+
+    function openStudentDetailModal(index) {
+      const student = adminDataCache[index];
+      if (!student) return;
+
+      document.getElementById("detail-student-title").textContent = `${student.studentId} (${student.studentName || '이름 없음'}) 학생의 회고`;
+      document.getElementById("detail-student-sub").textContent = `제출 일시: ${student.timestamp || '-'}`;
+
+      const container = document.getElementById("detail-answers-body");
+      container.innerHTML = "";
+
+      const ansMap = student.answers || {};
+
+      questions.forEach(q => {
+        const ans = ansMap[q.id];
+        let val = ans ? ans.value : "미작성";
+        if (ans && ans.value === "기타" && ans.otherText) {
+          val = `기타: ${ans.otherText}`;
+        }
+
+        const div = document.createElement("div");
+        div.className = "bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs";
+        div.innerHTML = `
+          <p class="font-bold text-slate-600 mb-1">Q${q.id}. ${q.question}</p>
+          <p class="font-semibold text-slate-800 bg-white p-2 rounded-lg border border-slate-100">${escapeHtml(val)}</p>
+        `;
+        container.appendChild(div);
+      });
+
+      document.getElementById("modal-student-detail").classList.remove("hidden");
+    }
+
+    // ========================================================
+    // 4. Utility Functions (Confetti, Image, Copy)
+    // ========================================================
+    function triggerConfetti() {
+      if (typeof confetti === 'function') {
+        confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 } });
+      }
+    }
+
+    function downloadCardImage() {
+      showToast("이미지 생성 중입니다...");
+      const card = document.getElementById("summary-card-container");
+      html2canvas(card, { scale: 2, backgroundColor: "#fffdfa" }).then(canvas => {
+        const link = document.createElement("a");
+        link.href = canvas.toDataURL("image/png");
+        link.download = `${currentStudent.studentId}_추억카드.png`;
+        link.click();
+        showToast("이미지가 저장되었습니다!");
+      });
+    }
+
+    function copyToClipboard() {
+      let text = `[나의 1년 학교생활 추억 카드]\n`;
+      text += `학생: ${currentStudent.studentId} (${currentStudent.studentName || ''})\n\n`;
+
+      questions.forEach(q => {
+        const ans = answers[q.id];
+        let val = ans ? ans.value : "미작성";
+        if (ans && ans.value === "기타" && ans.otherText) val = `기타: ${ans.otherText}`;
+        text += `Q${q.id}. ${q.question}\n👉 ${val}\n\n`;
+      });
+
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        showToast("복사되었습니다!");
+      } catch (err) {
+        showToast("복사에 실패했습니다.");
+      }
+      document.body.removeChild(textArea);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>
